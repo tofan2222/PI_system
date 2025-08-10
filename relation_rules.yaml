@@ -1,0 +1,36 @@
+verbs:
+  TRIGGERS_ON: ["trigger", "cause", "activate", "trip"]
+  MEASURES: ["measure", "read", "detect", "indicate"]
+  PART_OF: ["contain", "comprise", "belong"]
+  FOLLOWS: ["after", "then", "next", "subsequent"]
+  ACKNOWLEDGES: ["acknowledge", "reset", "confirm"]
+
+assets:
+  turbine:
+    - "shaft"
+    - "speed"
+    - "valve"
+    - "bearing"
+    - "vibration"
+    - "trip"
+    - "steam"
+    - "temperature"
+    - "pressure"
+    - "rotation"
+
+  boiler:
+    - "drum"
+    - "furnace"
+    - "fan"
+    - "economizer"
+    - "steam"
+    - "fuel"
+    - "air"
+    - "pressure"
+    - "temperature"
+    - "flue"
+    - "o2"
+    - "co"
+    - "flow"
+
+fallback: "RELATED_TO"
