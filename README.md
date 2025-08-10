@@ -1,5 +1,5 @@
 # PI_system
-
+(Note: All codes are there but plant_data files and input file I am not providing)
 # Big Picture – AI-Native Industrial Intelligence Platform
 
 We are building an **AI-Native Industrial Intelligence Platform** designed to replace and outperform traditional PI (Process Information) systems such as AVEVA PI.
