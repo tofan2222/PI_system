@@ -67,88 +67,87 @@ This document provides a **full technical overview** of the repository:
 ### `d_pipelines/` – Data Ingestion & Processing
 - **Purpose:** Reads, validates, processes, optionally chunks, and ingests plant data.
 - **Key Files:**
-  - `demo_data_reader.py` – Reads CSV (long/wide), JSON, Parquet, OPC UA (mock). Filters tags via `plant_config.csv`.
-  - `demo_data_processor.py` – Normalizes timestamps, coerces data types, adds schema versioning.
-  - `demo_data_chunker.py` – Splits large datasets into smaller, manageable chunks.
-  - `demo_data_ingestor.py` – Sends processed/chunked data to brokers (Kafka/MQTT) or to disk queues.
-- **Flow:**
-
-Raw Data → Reader → Processor → (Chunker) → Ingestor
-
+  - **demo_data_reader.py** – Reads CSV (long/wide), JSON, Parquet, OPC UA (mock). Filters tags via *plant_config.csv*.
+  - **demo_data_processor.py** – Normalizes timestamps, coerces data types, adds schema versioning.
+  - **demo_data_chunker.py** – Splits large datasets into smaller, manageable chunks.
+  - **demo_data_ingestor.py** – Sends processed/chunked data to brokers (Kafka/MQTT) or to disk queues.
+- **Flow:** Raw Data → Reader → Processor → (Chunker) → Ingestor
 
 ---
 
 ### `KG_opc/` – Knowledge Graph Build & Persistence
 - **Purpose:** Creates and updates the Neo4j Knowledge Graph from static metadata and dynamic events.
 - **Key Files:**
-- `kg_persistor.py` – Manages Neo4j transactions and validates nodes/relationships before write.
-- `KG_schema.yaml` – Defines allowed KG entity types and relationships.
-- `kg_metadata.py` – Loads `plant_config.csv`, `asset.csv`, `alarm.csv` and creates KG nodes/edges.
-- `ner_extractor.py` – Uses spaCy to identify entities from event descriptions.
-- `relation_extractor.py` – Applies `relation_rules.yaml` to infer KG relationships.
-- **Flow:**
-Metadata + Events → Metadata Loader → NER + Relation Extractor → KG Persistor (Neo4j)
-
+- **kg_persistor.py** – Manages Neo4j transactions and validates nodes/relationships before write.
+- **KG_schema.yaml** – Defines allowed KG entity types and relationships.
+- **kg_metadata.py** – Loads *plant_config.csv*, *asset.csv*, *alarm.csv* and creates KG nodes/edges.
+- **ner_extractor.py** – Uses spaCy to identify entities from event descriptions.
+- **relation_extractor.py** – Applies *relation_rules.yaml* to infer KG relationships.
+- **Flow:** Metadata + Events → Metadata Loader → NER + Relation Extractor → KG Persistor (Neo4j)
 ---
 
 ## 2. Individual File Explanations & Key Features
 
 ### d_config
-- **`relation_rules.yaml`**
+- **relation_rules.yaml**
 - Declarative mapping of entity-to-entity relations.
 - Keeps relationship logic out of code.
-- **`demo_settings.py`**
+  
+- **demo_settings.py**
 - One-stop configuration import for the entire pipeline.
 
 ---
 
 ### d_security
-- **`demo_auth.py`**
+- **demo_auth.py**
 - Pluggable credential source (env/vault).
 - Simplifies switching between DEV and PROD modes.
-- **`demo_crypto.py`**
+- **demo_crypto.py**
 - Encryption wrapper with pass-through in DEV mode.
 - Ready for integration with enterprise security modules.
 
 ---
 
 ### plant_data
-- **`plant_config.csv`**
-- Primary tag reference; ensures ingestion only processes known tags.
-- **`alarm.csv`**
-- Defines alarm triggers; used in event detection.
-- **`asset.csv`**
-- Links tags to physical assets in KG.
-- **`operations.py`**
-- Creates synthetic operations/events for testing ingestion and KG population.
+- **plant_config.csv** Primary tag reference; ensures ingestion only processes known tags.
+- **alarm.csv** Defines alarm triggers; used in event detection.
+- **asset.csv** Links tags to physical assets in KG.
+- **operations.py** Creates synthetic operations/events for testing ingestion and KG population.
 
 ---
 
 ### d_pipelines
-- **`demo_data_reader.py`**
+- **demo_data_reader.py**
 - Auto-detects file format.
 - Validates tags against plant config.
-- **`demo_data_processor.py`**
+- 
+- **demo_data_processor.py**
 - Cleans and normalizes incoming readings.
 - Adds metadata for traceability.
-- **`demo_data_chunker.py`**
+
+- **demo_data_chunker.py**
 - Reduces memory load in large batch processing.
-- **`demo_data_ingestor.py`**
+- 
+- **demo_data_ingestor.py**
 - Sends batches to Kafka/MQTT or to a local retry queue.
 
 ---
 
 ### KG_opc
-- **`kg_persistor.py`**
+- **kg_persistor.py**
 - Transaction-safe writes to Neo4j.
 - Uses `MERGE` for idempotent persistence.
-- **`KG_schema.yaml`**
+
+- **KG_schema.yaml**
 - Enforces KG schema consistency.
-- **`kg_metadata.py`**
+
+- **kg_metadata.py**
 - Reads static CSVs to create plant structure in KG.
-- **`ner_extractor.py`**
+
+- **ner_extractor.py**
 - Extracts entities to link events to assets and systems.
-- **`relation_extractor.py`**
+
+- **relation_extractor.py**
 - Applies domain-specific rules to form semantic connections.
 
 ---
@@ -158,34 +157,33 @@ Metadata + Events → Metadata Loader → NER + Relation Extractor → KG Persis
 ### Step-by-Step
 1. **Input Reading**
  - Source: CSV, JSON, Parquet, or OPC UA (mock/live).
- - `demo_data_reader.py` validates tags against `plant_config.csv`.
+ - *demo_data_reader.py* validates tags against *plant_config.csv*.
 
 2. **Processing**
- - `demo_data_processor.py` normalizes timestamps, values, and metadata.
+ - *demo_data_processor.py* normalizes timestamps, values, and metadata.
 
 3. **Chunking (Optional)**
- - `demo_data_chunker.py` splits datasets for efficient handling.
+ - *demo_data_chunker.py* splits datasets for efficient handling.
 
 4. **Ingestion**
- - `demo_data_ingestor.py` pushes data to brokers or local queue.
+ - *demo_data_ingestor.py* pushes data to brokers or local queue.
 
 5. **Alarm Detection**
- - Orchestrator checks readings against `alarm.csv` thresholds.
+ - Orchestrator checks readings against *alarm.csv* thresholds.
  - Generates events when limits exceeded.
 
 6. **KG Construction**
- - `kg_metadata.py` loads plant structure from CSVs.
- - Events pass through `ner_extractor.py` and `relation_extractor.py`.
- - `kg_persistor.py` writes final graph structure to Neo4j.
+ - *kg_metadata.py* loads plant structure from CSVs.
+ - Events pass through *ner_extractor.py* and *relation_extractor.py*.
+ - *kg_persistor.py* writes final graph structure to Neo4j.
 
 7. **Alarm & Asset Integration**
- - `asset.csv` ensures events are tied to physical assets.
- - `alarm.csv` ensures KG includes alarm nodes linked to triggered events.
+ - *asset.csv* ensures events are tied to physical assets.
+ - *alarm.csv* ensures KG includes alarm nodes linked to triggered events.
 
 ---
 
 ## 4. Combined Flow Diagram
-```text
 [CSV / OPC UA] 
 → demo_data_reader.py (validate tags) 
 → demo_data_processor.py (normalize) 
@@ -199,10 +197,8 @@ Detected Events + Plant Metadata
 → ner_extractor.py & relation_extractor.py
 → kg_persistor.py (Neo4j)
 
-file 3)
-# Product Overview & Roadmap – AI-Native Industrial Intelligence Platform
 
----
+# Product Overview & Roadmap – AI-Native Industrial Intelligence Platform
 
 ## 4. Achievements & Immediate Next Steps
 
